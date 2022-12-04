@@ -9,36 +9,44 @@ const client = new Client({
   password: process.env.DB_PASSWORD,
 });
 
-client.connect();
-
 exports.handler = async (event) => {
-  console.log('@@@ Received event:', JSON.stringify(event, null, 2));
+  // console.log('@@@ Received event:', JSON.stringify(event, null, 2));
+  console.log('@@@ Received event.path:', event.path);
+  console.log('@@@ Received event.httpMethod:', event.httpMethod);
+  console.log('@@@ Received event.queryStringParameters:', JSON.stringify(event.queryStringParameters, null, 2));
+  console.log('@@@ Received event.body:', event.body);
+
   const response = {
-    statusCode: 500,
+    statusCode: 200,
+    headers: {},
     body: {
       message: '',
     }
   }
-  
-  switch (`${event.path}_${event.httpMethod}`) {
-    case '/notepad/test_GET':
-      const query = 'select * from note_list';
 
-      client.query(query, (err, res) => {
-        if (err) {
-          console.log(err.stack);
-          // console.log(err);
-          return;
-        }
-        
+  try {
+    await client.connect();
+
+    switch (`${event.path}_${event.httpMethod}`) {
+      case '/note-list_GET':
+        const query = 'select * from note_list';
+  
+        const result = await client.query(query);
         response.statusCode = 200;
-        response.body.result = res.rows;
-      
-        client.end();
-      });
-      break;
-    default:
-      response.body.message = '요청 처리에 실패했습니다.';
+        response.body.result = result.rows;
+        break;
+      default:
+        console.warn('not matched!!');
+    }
+  } catch(error) {
+    console.error(error);
+
+    response.statusCode = 500;
+    response.body.message = '요청 처리에 실패했습니다.';
+  } finally {
+    console.log('@@@ done lambda!!');
+    await client.end();
+    response.body = JSON.stringify(response.body);
   }
   
   return response;
