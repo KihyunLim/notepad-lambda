@@ -1,14 +1,6 @@
 require('dotenv').config();
 const { Client } = require('pg');
 
-const client = new Client({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  database: process.env.DB_DATABASE,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-});
-
 exports.handler = async (event) => {
   // console.log('@@@ Received event:', JSON.stringify(event, null, 2));
   console.log('@@@ Received event.path:', event.path);
@@ -18,14 +10,27 @@ exports.handler = async (event) => {
 
   const response = {
     statusCode: 200,
-    headers: {},
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
     body: {
       message: '',
     }
-  }
+  };
+  const client = new Client({
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT),
+    database: process.env.DB_DATABASE,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+  });
 
   try {
-    await client.connect();
+    await client.connect((error) => {
+      if (error) {
+        throw error;
+      }
+    });
 
     switch (`${event.path}_${event.httpMethod}`) {
       case '/note-list_GET':
