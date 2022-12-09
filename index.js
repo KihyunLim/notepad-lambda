@@ -33,15 +33,25 @@ exports.handler = async (event) => {
     });
 
     switch (`${event.path}_${event.httpMethod}`) {
-      case '/note-list_GET':
+      case '/note-list_GET': {
         const query = 'select * from note_list';
   
         const result = await client.query(query);
         response.statusCode = 200;
         response.body.result = result.rows;
         break;
-      default:
+      }
+      case '/bookmark-list_GET': {
+        const query = 'select * from bookmark_list';
+  
+        const result = await client.query(query);
+        response.statusCode = 200;
+        response.body.result = result.rows;
+        break;
+      }
+      default: {
         console.warn('not matched!!');
+      }
     }
   } catch(error) {
     console.error(error);
