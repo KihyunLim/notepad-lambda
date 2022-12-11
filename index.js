@@ -38,7 +38,7 @@ exports.handler = async (event) => {
   
         const result = await client.query(query);
         response.statusCode = 200;
-        response.body.result = result.rows;
+        response.body.noteList = result.rows;
         break;
       }
       case '/bookmark-list_GET': {
@@ -46,7 +46,7 @@ exports.handler = async (event) => {
   
         const result = await client.query(query);
         response.statusCode = 200;
-        response.body.result = result.rows;
+        response.body.bookmarkList = result.rows;
         break;
       }
       default: {
